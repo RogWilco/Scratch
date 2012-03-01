@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="[Application Name]" default="all" basedir=".">
+	<description>[Application Name] multi-platform build file.</description>
+	
+	<property name="application.name" value="[Application Name]" />
+	<property name="application.title" value="[Application Name]" />
+	<property name="application.version" value="0.1.0" />
+	
+	<property name="platform.android.root" location="platforms/android/" />
+	<property name="platform.android.build" location="build/android/" />
+	
+	<property name="platform.ios.root" location="platforms/ios/" />
+	<property name="platform.ios.build" location="build/ios/" />
+	<property name="platform.ios.developer" value="iPhone Developer: [Developer Name] ([Developer ID])" />
+	<property name="platform.ios.profile" location="/Users/[Developer Username]/Library/MobileDevice/Provisioning Profiles/[Developer Provisioning Profile].mobileprovision" />
+
+	<!--
+	==========================================================================
+	Help Targets
+	==========================================================================
+	-->
+	<target name="help" description="Displays this help message, listing all available targets.">
+		<echo message="${android}" />
+		<echo message=" Target                   Description" />
+		<echo message="------------------------------------------------------------------------------------------------------------" />
+		<echo message=" help                     Displays this help message, listing all available targets." />
+		<echo message=" all                      Cleans/compiles the application for all available platforms." />
+		<echo message=" clean                    Cleans all platforms." />
+		<echo message=" compile                  Compiles the application for all available platforms." />
+		<echo message="" />
+		<echo message=" android                  Cleans/compiles the application for the Android platform." />
+		<echo message=" android.clean            Cleans all existing compilation output for the Android platform." />
+		<echo message=" android.compile          Compiles the application for the Android platform." />
+		<echo message=" android.deploy           Complies and deploys the application to an active AVD (Android virtual device)." />
+		<echo message="" />
+		<echo message=" ios                      Cleans/compiles the application for the iOS platform." />
+		<echo message=" ios.clean                Cleans all existing compilation output for the iOS platform." />
+		<echo message=" ios.compile              Compiles the application for the iOS platform." />
+		<echo message=" ios.deploy               Compiles and deploys the application to the iOS simulator." />
+	</target>
+	
+	<!--
+	==========================================================================
+	Common Targets
+	==========================================================================
+	-->
+	<target name="all" depends="clean,compile" description="Cleans and then compiles the application for all available platforms." />
+	<target name="clean" depends="android.clean,ios.clean" description="Cleans all platforms." />
+	<target name="compile" depends="android,ios" description="Compiles the application for all available platforms." />
+	
+	<!--
+	==========================================================================
+	Android Targets
+	==========================================================================
+	-->
+	<target name="android" depends="android.clean,android.compile" description="Cleans/compiles the application for the Android platform." />
+	<target name="android.clean" description="Cleans all existing compilation output for the Android platform.">
+		<delete dir="${platform.android.build}" />
+		<ant dir="${platform.android.root}" target="clean" />
+	</target>
+	<target name="android.compile" description="Compiles the application for the Android platform.">
+		<echo message="Compiling Platform: Android" />
+		<mkdir dir="${platform.android.build}" />
+		<ant dir="${platform.android.root}" target="release" />
+
+		<move todir="${platform.android.build}">
+			<fileset dir="${platform.android.root}/bin" />
+		</move>
+	</target>
+	<target name="android.deploy" description="Complies and deploys the application to an active AVD (Android virtual device).">
+		<echo message="Deploying to Android Virtual Device" />
+		<ant dir="${platform.android.root}" target="debug" />
+		<ant dir="${platform.android.root}" target="install" />
+	</target>
+	
+	<!--
+	==========================================================================
+	iOS Targets
+	==========================================================================
+	-->
+	<target name="ios" depends="ios.clean,ios.compile" description="Cleans/compiles the application for the iOS platform." />
+	<target name="ios.clean" description="Cleans all existing compilation output for the iOS platform.">
+		<delete dir="${platform.ios.build}" />
+		<exec executable="xcodebuild" dir="." failonerror="true">
+			<arg line="-project '${platform.ios.root}/${application.name}.xcodeproj'" />
+			<arg line="CONFIGURATION_BUILD_DIR='${platform.ios.build}'" />
+			<arg line="-alltargets clean" />
+		</exec>
+	</target>
+	<target name="ios.compile" description="Compiles the application for the iOS platform.">
+		<echo message="Compiling Platform: iOS" />
+		<mkdir dir="${platform.ios.build}" />
+		<exec executable="xcodebuild" dir="." failonerror="true">
+			<arg line="-project '${platform.ios.root}/${application.name}.xcodeproj'" />
+			<arg line="-alltargets" />
+			<arg line="-configuration Release" />
+			<arg line="-sdk 'iphoneos'" />
+			<arg line="CONFIGURATION_BUILD_DIR='${platform.ios.build}'" />
+		</exec>
+		<echo message="Building APP file"/>
+		<exec executable="zip" dir="${platform.ios.build}" failonerror="true">
+			<arg line="-y -r '${application.title}.zip' '${application.title}.app'" />
+		</exec>
+		<echo message="Building IPA file"/>
+		<exec executable="xcrun">
+			<arg line="-sdk iphoneos PackageApplication"/>
+			<arg line="-v '${platform.ios.build}/${application.title}.app'"/>
+			<arg line="-o '${platform.ios.build}/${application.title}.ipa'"/>
+			<arg line="--sign '${platform.ios.developer}'"/>
+			<arg line="--embed '${platform.ios.profile}'"/>
+		</exec>
+	</target>
+	<target name="ios.deploy" description="Compiles and deploys the application to the iOS simulator.">
+		<echo message="Deploying to iOS Simulator" />
+		<mkdir dir="${platform.ios.build}" />
+		<exec executable="xcodebuild" dir="." failonerror="true">
+			<arg line="-project '${platform.ios.root}/${application.name}.xcodeproj'" />
+			<arg line="-alltargets" />
+			<arg line="-configuration Release" />
+			<arg line="-sdk 'iphonesimulator'" />
+			<arg line="CONFIGURATION_BUILD_DIR='${platform.ios.build}'" />
+		</exec>
+		<exec executable="/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator" spawn="true">
+			<arg line="-SimulateApplication '${platform.ios.build}/${application.title}.app/${application.title}'" />
+		</exec>
+	</target>
+</project>
