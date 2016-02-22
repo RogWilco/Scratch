@@ -18,7 +18,7 @@
 		var shapeImages = {};
 
 		$(data).find('.tileColor').each(function() {
-			var colorCode = $(this).find('.forgotPasswordText').html();
+			var colorCode = $(this).parent().children('strong.forgotPasswordText').html().replace(/ /g,'');
 			var colorThumb = $(this).find('img[width=49]').attr('src');
 			var colorFull = $(this).find('img[width=90]').attr('src');
 
@@ -27,6 +27,8 @@
 				full: colorFull
 			}
 		});
+        
+        console.log(colorImages);
 
 		// Insert Additional Details
 		$('.contenttable td.td-0').each(function() {
