@@ -16,30 +16,30 @@
 	$.get('http://www.heathceramics.com/home/pages/tile-build/designing-with-heath-tile/color-palette', function(data) {
 		var colorImages = {};
 		var shapeImages = {};
-		
+
 		$(data).find('.tileColor').each(function() {
 			var colorCode = $(this).find('.forgotPasswordText').html();
 			var colorThumb = $(this).find('img[width=49]').attr('src');
 			var colorFull = $(this).find('img[width=90]').attr('src');
-			
+
 			colorImages[colorCode] = {
 				thumb: colorThumb,
 				full: colorFull
 			}
 		});
-		
+
 		// Insert Additional Details
 		$('.contenttable td.td-0').each(function() {
 			var colorMeta = $(this).html().match(/<strong>.*<\/strong>.*<br>.*<br>(.*)/i);
 
 			var colorCode = colorMeta[1];
 			var colorThumb = '';
-			
-			if(colorImages[colorCode]) {
+
+			if (colorImages[colorCode]) {
 				colorThumb = colorImages[colorCode].thumb;
 			}
-			
-			$(this).prepend('<div style="float: left; margin-right: 2em;"><img src="' + colorThumb + '" width="49" height="49" /></div>');	
-		});	
+
+			$(this).prepend('<div style="float: left; margin-right: 2em;"><img src="' + colorThumb + '" width="49" height="49" /></div>');
+		});
 	});
 })(jQuery);
