@@ -28,7 +28,6 @@
 			}
 		});
 		
-		console.log(colorImages);
 		// Insert Additional Details
 		$('.contenttable td.td-0').each(function() {
 			var colorMeta = $(this).html().match(/<strong>.*<\/strong>.*<br>.*<br>(.*)/i);
